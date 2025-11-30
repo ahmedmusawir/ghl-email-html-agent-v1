@@ -1,0 +1,8 @@
+{
+  "function_name": "insert_element",
+  "args": {
+    "parent_selector": "div",
+    "new_element_html": "<a href='https://google.com' style='background-color: #D8BFD8; color: #000; padding: 15px 25px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; margin-top: 10px;'>Go To Google</a>",
+    "position": "append"
+  }
+}

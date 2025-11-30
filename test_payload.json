@@ -1,0 +1,6 @@
+{
+  "function_name": "remove_element",
+  "args": {
+    "selector": "a[href='https://google.com']"
+  }
+}

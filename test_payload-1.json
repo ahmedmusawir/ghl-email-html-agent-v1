@@ -1,0 +1,8 @@
+{
+  "function_name": "apply_style_edit",
+  "args": {
+    "selector": "h1",
+    "css_property": "color",
+    "css_value": "green"
+  }
+}

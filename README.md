@@ -1,2 +1,3 @@
-# ghl-email-html-agent-v1
-This is poorman's Lovable ... this will help us edit the html of a ghl email template
+# GHL Email Template Workbench
+
+A Streamlit-based tool for editing GHL email HTML using an AI Agent and Beautiful Soup.

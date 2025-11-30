@@ -1,0 +1,5 @@
+streamlit
+google-adk
+beautifulsoup4
+python-dotenv
+google-genai

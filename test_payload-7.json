@@ -1,0 +1,8 @@
+{
+  "function_name": "apply_style_edit",
+  "args": {
+    "selector": "div",
+    "css_property": "text-align",
+    "css_value": "center"
+  }
+}
