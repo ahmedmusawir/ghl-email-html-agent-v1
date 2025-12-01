@@ -4,11 +4,26 @@ import os
 import json
 import sys
 
-def apply_style_edit(html_content: str, selector: str, css_property: str, css_value: str) -> str:
+# Global state for the agent
+_active_html = ""
+
+def set_active_html(html_str: str):
+    global _active_html
+    _active_html = html_str
+
+def get_active_html() -> str:
+    return _active_html
+
+def apply_style_edit(selector: str, css_property: str, css_value: str, html_content: str = None) -> str:
     """
     Parses HTML, finds elements matching the selector, and updates a specific CSS property 
     in their inline style attribute without overwriting other styles.
     """
+    global _active_html
+    if html_content is None:
+        html_content = _active_html
+        
+    print(f"🛠️ [TOOL EXEC] apply_style_edit called with args: {locals()}")
     soup = BeautifulSoup(html_content, 'html.parser')
     elements = soup.select(selector)
 
@@ -35,25 +50,39 @@ def apply_style_edit(html_content: str, selector: str, css_property: str, css_va
             
         element['style'] = new_style_str
 
-    return str(soup)
+    result = str(soup)
+    _active_html = result
+    return result
 
-def update_text_content(html_content: str, selector: str, new_text: str) -> str:
+def update_text_content(selector: str, new_text: str, html_content: str = None) -> str:
     """
     Finds elements matching the selector and replaces their text content.
     """
+    global _active_html
+    if html_content is None:
+        html_content = _active_html
+        
+    print(f"🛠️ [TOOL EXEC] update_text_content called with args: {locals()}")
     soup = BeautifulSoup(html_content, 'html.parser')
     elements = soup.select(selector)
     
     for element in elements:
         element.string = new_text
         
-    return str(soup)
+    result = str(soup)
+    _active_html = result
+    return result
 
-def update_inner_html(html_content: str, selector: str, new_html: str) -> str:
+def update_inner_html(selector: str, new_html: str, html_content: str = None) -> str:
     """
     Finds elements matching the selector and replaces their inner HTML content.
     This allows for rich text updates (e.g. adding <span> tags).
     """
+    global _active_html
+    if html_content is None:
+        html_content = _active_html
+        
+    print(f"🛠️ [TOOL EXEC] update_inner_html called with args: {locals()}")
     soup = BeautifulSoup(html_content, 'html.parser')
     elements = soup.select(selector)
     
@@ -73,13 +102,20 @@ def update_inner_html(html_content: str, selector: str, new_html: str) -> str:
         for tag in tags_to_insert:
             element.append(tag)
             
-    return str(soup)
+    result = str(soup)
+    _active_html = result
+    return result
 
-def insert_element_relative(html_content: str, target_selector: str, new_html: str, position: str = 'after') -> str:
+def insert_element_relative(target_selector: str, new_html: str, position: str = 'after', html_content: str = None) -> str:
     """
     Parses new_html and inserts it relative to the element matching target_selector.
     position: 'before', 'after', 'inside_start', 'inside_end'
     """
+    global _active_html
+    if html_content is None:
+        html_content = _active_html
+        
+    print(f"🛠️ [TOOL EXEC] insert_element_relative called with args: {locals()}")
     soup = BeautifulSoup(html_content, 'html.parser')
     target_elements = soup.select(target_selector)
     
@@ -114,12 +150,19 @@ def insert_element_relative(html_content: str, target_selector: str, new_html: s
              for tag in tags_to_insert:
                 target.append(tag)
                 
-    return str(soup)
+    result = str(soup)
+    _active_html = result
+    return result
 
-def remove_element(html_content: str, selector: str) -> str:
+def remove_element(selector: str, html_content: str = None) -> str:
     """
     Finds all elements matching the selector and removes them from the HTML tree.
     """
+    global _active_html
+    if html_content is None:
+        html_content = _active_html
+        
+    print(f"🛠️ [TOOL EXEC] remove_element called with args: {locals()}")
     soup = BeautifulSoup(html_content, 'html.parser')
     elements = soup.select(selector)
     
@@ -129,7 +172,10 @@ def remove_element(html_content: str, selector: str) -> str:
     for element in elements:
         element.decompose()
         
-    return str(soup)
+    result = str(soup)
+    _active_html = result
+    return result
+
 
 if __name__ == "__main__":
     # JSON File Test Harness
