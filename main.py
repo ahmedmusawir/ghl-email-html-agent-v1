@@ -2,11 +2,15 @@ import streamlit as st
 import agent
 import tools
 import os
+import uuid
 import streamlit.components.v1 as components
 
 st.set_page_config(layout="wide", page_title="GHL Email Workbench")
 
 # --- Initialize Session State ---
+if "agent_session_id" not in st.session_state:
+    st.session_state.agent_session_id = str(uuid.uuid4())
+
 if "html_history" not in st.session_state:
     st.session_state.html_history = [] # Stack for Undo
 
@@ -89,6 +93,7 @@ else:
                     response_text, new_html = agent.run_agent(
                         user_input=prompt,
                         current_html=st.session_state.current_html,
+                        session_id=st.session_state.agent_session_id,
                         status_callback=lambda tool_name: st.toast(f"Cybalorean is using tool: {tool_name}")
                     )
                 

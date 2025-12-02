@@ -60,24 +60,37 @@ CRITICAL: Do NOT output raw HTML in your text response unless asked to explain. 
 
 from google.adk.sessions import InMemorySessionService
 
-async def _run_async(user_input: str, html_context: str, status_callback=None):
-    # 1. Setup Session Service
-    session_service = InMemorySessionService()
-    
-    # 2. Define Constants
+# 4. Global Session Service (The Brain)
+# Persist session data across function calls (but not restarts)
+session_service = InMemorySessionService() 
+# db_url = "sqlite:///./agent_sessions.db"
+# session_service = DatabaseSessionService(db_url=db_url)
+
+async def _run_async(user_input: str, html_context: str, session_id: str = None, status_callback=None):
+    # 1. Define Constants
     APP_NAME = "ghl_app"
     USER_ID = "user"
-    SESSION_ID = str(uuid.uuid4())
+    
+    if not session_id:
+        session_id = str(uuid.uuid4())
 
-    # 3. Create Session manually
-    # Documentation says create_session is async
-    session = await session_service.create_session(
+    # 2. Get or Create Session
+    # Try to retrieve existing session first
+    session = await session_service.get_session(
         app_name=APP_NAME,
         user_id=USER_ID,
-        session_id=SESSION_ID
+        session_id=session_id
     )
 
-    # 4. Create Runner with app_name and session_service injected
+    if session is None:
+        # Session does not exist, create it
+        session = await session_service.create_session(
+            app_name=APP_NAME,
+            user_id=USER_ID,
+            session_id=session_id
+        )
+
+    # 3. Create Runner with app_name and session_service injected
     # Use base Runner class as per documentation pattern
     local_runner = Runner(
         agent=ghl_agent,
@@ -85,7 +98,7 @@ async def _run_async(user_input: str, html_context: str, status_callback=None):
         session_service=session_service
     )
 
-    # 5. Construct Prompt with HTML Context
+    # 4. Construct Prompt with HTML Context
     full_prompt = f"""
 CONTEXT:
 You are editing the following HTML file.
@@ -97,10 +110,10 @@ USER REQUEST:
 {user_input}
 """
 
-    # 6. Run Async
+    # 5. Run Async
     events = local_runner.run_async(
         user_id=USER_ID, 
-        session_id=SESSION_ID, 
+        session_id=session_id, 
         new_message=types.Content(role="user", parts=[types.Part.from_text(text=full_prompt)])
     )
     
@@ -117,12 +130,12 @@ USER REQUEST:
     
     return response_text
 
-def run_agent(user_input: str, current_html: str, status_callback=None):
+def run_agent(user_input: str, current_html: str, session_id: str = None, status_callback=None):
     # Step 1: Set active HTML context
     tools.set_active_html(current_html)
     
     # Step 2: Run the agent asynchronously
-    response_text = asyncio.run(_run_async(user_input, current_html, status_callback))
+    response_text = asyncio.run(_run_async(user_input, current_html, session_id, status_callback))
     
     # Step 3: Get the modified HTML
     new_html = tools.get_active_html()
