@@ -176,7 +176,6 @@ def remove_element(selector: str, html_content: str = None) -> str:
     _active_html = result
     return result
 
-
 if __name__ == "__main__":
     # JSON File Test Harness
     

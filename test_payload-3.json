@@ -1,7 +1,0 @@
-{
-  "function_name": "update_inner_html",
-  "args": {
-    "selector": "h1",
-    "new_html": "Project: GHL <span style='color: #78E43A'>Cybalorean</span>"
-  }
-}

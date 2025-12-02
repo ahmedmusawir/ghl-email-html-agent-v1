@@ -1,6 +1,8 @@
 from google.adk.agents import Agent
 from google.adk.runners import Runner, InMemoryRunner
 from google.genai import types, Client
+from google.adk.tools import google_search
+from google.adk.tools.agent_tool import AgentTool
 import tools
 import asyncio
 import uuid
@@ -9,12 +11,28 @@ import os
 # Force Vertex AI usage via environment variable if not set
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "1"
 
-# Define the Agent
+# 1. Define the Search Specialist Agent
+search_agent = Agent(
+    model="gemini-2.5-flash", 
+    name="search_specialist",
+    description="A specialist in Google Search.",
+    instruction="You are a search specialist. Use the google_search tool to find factual information.",
+    tools=[google_search]
+)
+
+# 2. Wrap it as a Tool
+search_tool = AgentTool(search_agent)
+
+# 3. Define the Main Agent
 ghl_agent = Agent(
     name="ghl_email_architect",
     model="gemini-2.5-flash", # As requested
     description="GHL Email Architect Agent",
     instruction="""You are a GHL Email Architect. Your mission is to surgically modify HTML templates.
+
+You have access to a Google Search tool (`search_specialist`). Use it ONLY for factual data verification (e.g., finding hex codes, standard dimensions, or brand colors).
+If a user request is ambiguous (e.g., 'make it pop'), use Google Search to find standard design values or ASK the user for clarification.
+Do NOT use Google Search to learn how to code.
 
 PROTOCOL:
 1. ANALYZE: Identify the specific elements the user wants to change (e.g., "the red button" -> `a[style*='red']`).
@@ -24,6 +42,7 @@ PROTOCOL:
    - Use `update_inner_html` for rich text (bold, colors inside text).
    - Use `insert_element_relative` to add new items.
    - Use `remove_element` to delete items.
+   - Use `search_specialist` to verify facts if needed.
 3. CHAINING: If the user asks for multiple changes, call multiple tools in sequence.
 4. ERROR HANDLING: If a tool fails (returns "ERROR"), try a different selector or strategy.
 5. CONFIRM: Briefly state what you changed (e.g., "Updated header color to blue.").
@@ -34,13 +53,14 @@ CRITICAL: Do NOT output raw HTML in your text response unless asked to explain. 
         tools.update_text_content, 
         tools.update_inner_html, 
         tools.insert_element_relative, 
-        tools.remove_element
+        tools.remove_element,
+        search_tool
     ]
 )
 
 from google.adk.sessions import InMemorySessionService
 
-async def _run_async(user_input: str, html_context: str):
+async def _run_async(user_input: str, html_context: str, status_callback=None):
     # 1. Setup Session Service
     session_service = InMemorySessionService()
     
@@ -91,15 +111,18 @@ USER REQUEST:
              for part in event.content.parts:
                  if part.text:
                      response_text += part.text
+                 if part.function_call:
+                     if status_callback:
+                         status_callback(part.function_call.name)
     
     return response_text
 
-def run_agent(user_input: str, current_html: str):
+def run_agent(user_input: str, current_html: str, status_callback=None):
     # Step 1: Set active HTML context
     tools.set_active_html(current_html)
     
     # Step 2: Run the agent asynchronously
-    response_text = asyncio.run(_run_async(user_input, current_html))
+    response_text = asyncio.run(_run_async(user_input, current_html, status_callback))
     
     # Step 3: Get the modified HTML
     new_html = tools.get_active_html()

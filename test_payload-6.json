@@ -1,8 +1,0 @@
-{
-  "function_name": "insert_element_relative",
-  "args": {
-    "target_selector": "a[href='http://example.com']",
-    "new_html": "<img src='https://res.cloudinary.com/dyb0qa58h/image/upload/v1725320276/facebook_image_4_g4rm0s.png' alt='Facebook Group' style='display: block; margin: 20px auto; max-width: 100%; height: auto;'>",
-    "position": "before"
-  }
-}

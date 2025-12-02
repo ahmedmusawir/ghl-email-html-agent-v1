@@ -82,13 +82,14 @@ else:
             save_state() # Save before agent messes with it
             
             try:
-                with st.spinner("Jarvis is working..."):
+                with st.spinner("Cybalorean 1 is working..."):
                     # Run Agent using the new abstraction
                     # We pass the user prompt and the current HTML state
                     # The agent handles context injection, ADK execution, and state retrieval
                     response_text, new_html = agent.run_agent(
                         user_input=prompt,
-                        current_html=st.session_state.current_html
+                        current_html=st.session_state.current_html,
+                        status_callback=lambda tool_name: st.toast(f"Cybalorean is using tool: {tool_name}")
                     )
                 
                 # Update State

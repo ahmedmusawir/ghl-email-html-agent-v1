@@ -1,8 +1,0 @@
-{
-  "function_name": "insert_element",
-  "args": {
-    "parent_selector": "div",
-    "new_element_html": "<p>This is requested para 1</p>",
-    "position": "append"
-  }
-}

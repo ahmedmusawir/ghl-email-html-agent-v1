@@ -1,8 +1,0 @@
-{
-  "function_name": "insert_element_relative",
-  "args": {
-    "target_selector": "a[href='http://example.com']",
-    "new_html": "<p>This is para 1 … This is para 1 … This is para 1 … This is para 1 … This is para 1 … This is para 1 … This is para 1 … This is para 1 … This is para 1 … This is para 1 … This is para 1 …</p>",
-    "position": "before"
-  }
-}

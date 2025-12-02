@@ -1,1 +1,2 @@
 UI Logic must be in `main.py`, Agent Logic in `agent.py`.
+Inspection and utility scripts (e.g. check_*, inspect_*) MUST be created in the `inspect_code/` directory.
